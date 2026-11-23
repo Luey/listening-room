@@ -92,7 +92,10 @@ function makeCard(video) {
   const name = card.querySelector('.video-name');
   name.textContent = video.title;
   name.onclick = () => openVideo(video);
-  card.querySelector('.level').textContent = video.cefr ?? video.level;
+  const badge = card.querySelector('.level');
+  // The signal bars show the broad level used by the library filters.
+  badge.dataset.rank = levels.indexOf(video.level);
+  badge.textContent = video.cefr ?? video.level;
   card.querySelector('.creator').textContent = video.source;
   const mark = card.querySelector('.mark');
   updateMark(mark, video);

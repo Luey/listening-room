@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#17141e" media="(max-width: 700px)">
-<meta name="theme-color" content="#f8f7f3" media="(min-width: 701px)">
+<meta name="theme-color" content="#14131d">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="Find a Spanish video at your level and keep track of what you've watched.">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -17,15 +16,13 @@
 <body data-view="browse">
 <header class="top"><div class="wrap nav">
 <a class="brand" href="./"><img src="./icon-192.png" alt="" width="34" height="34">The Listening Room</a>
+<div class="header-actions">
+<button id="progress" class="quiet progress" aria-label="Show watched videos" title="Watched history"><span class="dock-icon icon-watched" aria-hidden="true"></span><span>Watched</span><strong id="watched-count">0</strong></button>
 <button id="install" class="quiet" aria-label="Install app" title="Install app"><span class="control-symbol icon-install" aria-hidden="true"></span><span class="control-label">Install app</span></button>
-</div></header>
+</div></div></header>
 <main class="wrap">
-<section class="intro" aria-labelledby="heading">
-<div><p class="eyebrow">SPANISH VIDEO LIBRARY</p><h1 id="heading">Listen in Spanish.</h1><p>Find a video you can follow, at a level that feels right.</p></div>
-<button id="progress" class="progress" aria-label="Show watched videos"><strong id="watched-count">0</strong><span>Watched</span></button>
-</section>
 <section aria-labelledby="library-heading" class="library">
-<div class="library-title"><h2 id="library-heading">Browse videos</h2><button id="open-filters" class="quiet" type="button" aria-label="Filters" title="Filters" aria-haspopup="dialog" aria-controls="filter-dialog"><span class="filter-icon" aria-hidden="true"><i></i><i></i><i></i></span></button><label class="search" id="search-bar"><span aria-hidden="true">⌕</span><input id="search" type="search" aria-label="Search videos" placeholder="Search videos"></label></div>
+<div class="library-title"><h1 id="library-heading">Browse videos</h1><button id="open-filters" class="quiet" type="button" aria-label="Filters" title="Filters" aria-haspopup="dialog" aria-controls="filter-dialog"><span class="filter-icon" aria-hidden="true"><i></i><i></i><i></i></span></button><label class="search" id="search-bar"><span class="dock-icon icon-search" aria-hidden="true"></span><input id="search" type="search" aria-label="Search videos" placeholder="Search videos"></label></div>
 <div id="desktop-filters"><div class="filters" id="filter-fields"><p class="filter-field-label">Level</p><div id="levels" class="levels" aria-label="Video level"></div><label class="source"><span class="filter-field-label">Source</span><select id="source" aria-label="Source"><option value="">All sources</option></select></label></div></div>
 <div class="results" id="results"><span id="result-count" role="status">Loading videos…</span><span id="filter-summary"></span><label class="toggle" id="watched-filter"><input id="hide-watched" type="checkbox" checked> Hide watched</label></div>
 <div id="grid" class="grid"></div>
