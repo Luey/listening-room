@@ -1,10 +1,13 @@
+import { levels, matchingVideos } from './library.js';
+
 const $ = id => document.getElementById(id);
-const levels = ['All levels', 'Superbeginner', 'Beginner', 'Intermediate', 'Advanced'];
+const difficulties = levels.slice(1);
 const storageKey = 'listening-room.watched';
 const pageSize = 24;
 let videos = [];
 let watched = new Set();
-let level = levels[0];
+let selectedLevels = new Set();
+let selectedSources = new Set();
 let view = 'browse';
 const dockButtons = document.querySelectorAll('[data-view-target]');
 const mobileLayout = matchMedia('(max-width: 700px)');
@@ -19,23 +22,49 @@ try {
 } catch {}
 
 function levelFilters() {
-  $('levels').replaceChildren(...levels.map(name => {
+  const container = $('levels');
+  if (container.children.length) {
+    for (const button of container.children) {
+      const name = button.textContent;
+      button.setAttribute('aria-pressed', String(name === levels[0] ? selectedLevels.size === 0 : selectedLevels.has(name)));
+    }
+    return;
+  }
+  container.replaceChildren(...levels.map(name => {
     const button = document.createElement('button');
+    button.type = 'button';
     button.textContent = name;
-    button.setAttribute('aria-pressed', String(level === name));
+    button.setAttribute('aria-pressed', String(name === levels[0] ? selectedLevels.size === 0 : selectedLevels.has(name)));
     button.onclick = () => {
-      level = name;
+      if (name === levels[0]) selectedLevels.clear();
+      else if (selectedLevels.has(name)) selectedLevels.delete(name);
+      else selectedLevels.add(name);
       limit = pageSize;
-      for (const filter of $('levels').children) {
-        filter.setAttribute('aria-pressed', String(filter === button));
-      }
+      levelFilters();
       render();
     };
     return button;
   }));
 }
 
-const searchKey = value => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+function sourceFilters() {
+  $('sources').replaceChildren(...[...new Set(videos.map(video => video.source))].sort().map(source => {
+    const label = document.createElement('label');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = source;
+    checkbox.checked = selectedSources.has(source);
+    checkbox.onchange = () => {
+      if (checkbox.checked) selectedSources.add(source);
+      else selectedSources.delete(source);
+      limit = pageSize;
+      render();
+    };
+    label.append(checkbox, document.createTextNode(source));
+    return label;
+  }));
+}
+
 const watchUrl = id => 'https://www.youtube.com/watch?v=' + id;
 
 function duration(seconds) {
@@ -47,14 +76,12 @@ function duration(seconds) {
 
 function render() {
   const watchedOnly = view === 'watched';
-  const query = searchKey($('search').value.trim());
-  const source = $('source').value;
   const hide = $('hide-watched').checked;
-  const filtered = videos.filter(video =>
-    (level === levels[0] || level === video.level)
-    && (!source || video.source === source)
-    && (watchedOnly ? watched.has(video.id) : !hide || !watched.has(video.id))
-    && (!query || searchKey(video.title + ' ' + (video.cefr ?? '')).includes(query)));
+  const sort = $('sort').value;
+  const filtered = matchingVideos(videos, {
+    levels: selectedLevels, sources: selectedSources, watched, watchedOnly,
+    hideWatched: hide, query: $('search').value, sort,
+  });
   $('watched-count').textContent = watched.size;
   $('progress').setAttribute('aria-pressed', String(watchedOnly));
   $('progress').setAttribute('aria-label', watchedOnly ? 'Show video library' : 'Show watched videos');
@@ -64,7 +91,12 @@ function render() {
   }
   $('library-heading').textContent = { browse: 'Browse videos', search: 'Search videos', watched: 'Watched videos' }[view];
   $('hide-watched').disabled = watchedOnly;
-  const activeFilters = [level !== levels[0] && level, source, !watchedOnly && !hide && 'Includes watched'].filter(Boolean);
+  const activeFilters = [
+    selectedLevels.size > 0 && selectedLevels.size < difficulties.length && difficulties.filter(name => selectedLevels.has(name)).join(', '),
+    selectedSources.size !== $('sources').children.length && (selectedSources.size === 1 ? [...selectedSources][0] : selectedSources.size ? `${selectedSources.size} sources` : 'No sources'),
+    sort !== 'default' && $('sort').selectedOptions[0].textContent,
+    !watchedOnly && !hide && 'Includes watched'
+  ].filter(Boolean);
   $('filter-summary').textContent = activeFilters.join(' · ');
   $('open-filters').classList.toggle('has-filters', activeFilters.length > 0);
   $('result-count').textContent = filtered.length.toLocaleString() + (filtered.length === 1 ? ' video' : ' videos');
@@ -205,13 +237,7 @@ function historyControl() {
 }
 
 function selectView(next) {
-  const previous = view;
   view = next;
-  if (next === 'watched' || previous === 'watched') {
-    level = levels[0];
-    $('source').value = '';
-    levelFilters();
-  }
   $('search').value = '';
   limit = pageSize;
   render();
@@ -241,11 +267,13 @@ function placeFilters() {
 
 $('open-filters').onclick = () => $('filter-dialog').showModal();
 $('reset-filters').onclick = () => {
-  level = levels[0];
-  $('source').value = '';
+  selectedLevels.clear();
+  selectedSources = new Set([...new Set(videos.map(video => video.source))]);
+  $('sort').value = 'default';
   $('hide-watched').checked = true;
   limit = pageSize;
   levelFilters();
+  sourceFilters();
   render();
 };
 placeFilters();
@@ -260,7 +288,7 @@ mobileLayout.addEventListener('change', event => {
     render();
   }
 });
-for (const id of ['search', 'source', 'hide-watched']) {
+for (const id of ['search', 'sort', 'hide-watched']) {
   $(id).addEventListener(id === 'search' ? 'input' : 'change', () => {
     limit = pageSize;
     render();
@@ -291,9 +319,8 @@ try {
   const response = await fetch('./catalog.json');
   if (!response.ok) throw new Error('Catalogue unavailable');
   videos = await response.json();
-  for (const source of [...new Set(videos.map(video => video.source))].sort()) {
-    $('source').add(new Option(source, source));
-  }
+  selectedSources = new Set(videos.map(video => video.source));
+  sourceFilters();
   render();
 } catch {
   $('result-count').textContent = 'Could not load the video library. Reopen the app to try again.';

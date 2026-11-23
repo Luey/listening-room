@@ -1,0 +1,9 @@
+{
+  "name": "listening-room",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "test:browser": "node .cursor/skills/verify-listening-room/verify.mjs all"
+  }
+}

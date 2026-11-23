@@ -23,7 +23,11 @@
 <main class="wrap">
 <section aria-labelledby="library-heading" class="library">
 <div class="library-title"><h1 id="library-heading">Browse videos</h1><button id="open-filters" class="quiet" type="button" aria-label="Filters" title="Filters" aria-haspopup="dialog" aria-controls="filter-dialog"><span class="filter-icon" aria-hidden="true"><i></i><i></i><i></i></span></button><label class="search" id="search-bar"><span class="dock-icon icon-search" aria-hidden="true"></span><input id="search" type="search" aria-label="Search videos" placeholder="Search videos"></label></div>
-<div id="desktop-filters"><div class="filters" id="filter-fields"><p class="filter-field-label">Level</p><div id="levels" class="levels" aria-label="Video level"></div><label class="source"><span class="filter-field-label">Source</span><select id="source" aria-label="Source"><option value="">All sources</option></select></label></div></div>
+<div id="desktop-filters"><div class="filters" id="filter-fields">
+<fieldset class="filter-group"><legend class="filter-field-label">Difficulty</legend><div id="levels" class="levels"></div></fieldset>
+<fieldset class="filter-group"><legend class="filter-field-label">Sources</legend><div id="sources" class="sources"></div></fieldset>
+<label class="sort"><span class="filter-field-label">Sort by</span><select id="sort"><option value="default">Catalog order</option><option value="title">Title A–Z</option><option value="shortest">Shortest first</option><option value="longest">Longest first</option><option value="easiest">Easiest first</option><option value="hardest">Hardest first</option></select></label>
+</div></div>
 <div class="results" id="results"><span id="result-count" role="status">Loading videos…</span><span id="filter-summary"></span><label class="toggle" id="watched-filter"><input id="hide-watched" type="checkbox" checked> Hide watched</label></div>
 <div id="grid" class="grid"></div>
 <button id="more" class="quiet more" hidden>Show more</button>

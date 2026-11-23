@@ -16,7 +16,9 @@ npm ci --prefix .cursor/skills/verify-listening-room
 .cursor/skills/verify-listening-room/node_modules/.bin/playwright install chromium
 ```
 
-Run the whole suite:
+Run `npm test` for the filter, search, sort, and watched logic without a browser or a local server.
+
+Run the whole browser suite:
 
 ```sh
 .cursor/skills/verify-listening-room/verify.mjs all
@@ -24,7 +26,7 @@ Run the whole suite:
 
 The runner serves the real `dist/` on a free loopback port. It uses the bundled catalogue, starts with empty browser storage, and needs no build, database, credentials, or production session. The doctor must pass and the browser must show video cards before a journey starts. The runner closes its own browser and server on completion and on caught failures. If interrupted, terminate only the command or session you started.
 
-If a managed macOS shell denies Chromium's Mach port registration, run this same command through the available permission flow for browser launch. Do not use the user's existing Chrome profile. If browser launch is unavailable, report that limitation and retain the doctor result.
+If a managed macOS shell denies Chromium's Mach port registration, run this same command through the available permission flow for browser launch. Do not use the user's existing Chrome profile. If browser launch or localhost is unavailable, retain the local result and use the GitHub `Verify and publish` workflow on an authorized push. Its browser job runs on GitHub's runner. Link the completed run and distinguish it from checks that ran locally.
 
 ## Doctor
 

@@ -59,19 +59,29 @@ a { color: var(--accent); }
 }
 .search input { min-width: 0; width: 100%; border: 0; background: none; color: var(--ink); font-size: 1rem; }
 .search input::placeholder { color: var(--muted); }
-.filters { margin-top: 19px; flex-wrap: wrap; }
+.filters { margin-top: 19px; flex-wrap: wrap; align-items: end; justify-content: flex-start; gap: 14px 24px; }
+.filter-group { min-width: 0; margin: 0; padding: 0; border: 0; }
+.filter-field-label { display: block; margin: 0 0 7px; color: var(--muted); font-size: .8125rem; font-weight: 650; }
 .levels { display: flex; gap: 8px; flex-wrap: wrap; }
 .levels button {
   min-height: 44px; padding: 6px 13px; border: 1px solid var(--line);
   border-radius: 10px; background: var(--surface); font-size: .875rem;
 }
 .levels button[aria-pressed="true"], .filter-done { background: var(--yellow); border-color: var(--yellow); color: #29212c; }
-.source select {
+.sources { display: flex; gap: 7px; flex-wrap: wrap; }
+.sources label {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 6px 11px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+  font-size: .875rem; cursor: pointer;
+}
+.sources label:has(input:checked) { border-color: var(--accent); background: var(--raised); }
+.sources input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+.sort select {
   width: 100%; min-height: 44px; padding: 6px 30px 6px 12px; appearance: none;
   border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 1rem;
 }
-.source { position: relative; }
-.source::after {
+.sort { position: relative; min-width: 170px; }
+.sort::after {
   content: ""; position: absolute; pointer-events: none; right: 13px; bottom: 18px;
   width: 7px; height: 7px; border: solid var(--muted); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
 }
@@ -151,7 +161,7 @@ dialog h2 { font-size: 1.125rem; margin: 0; }
 }
 #player-slot iframe { width: 100%; height: 100%; border: 0; }
 #install-dialog { max-width: 450px; }
-.app-dock, #open-filters, #filter-summary, .filter-field-label, .control-symbol { display: none; }
+.app-dock, #open-filters, #filter-summary, .control-symbol { display: none; }
 .dock-icon, .control-symbol { position: relative; width: 22px; height: 22px; flex: 0 0 22px; }
 .dock-icon, .mark .control-symbol { display: block; }
 .icon-library::before {
@@ -232,11 +242,12 @@ dialog h2 { font-size: 1.125rem; margin: 0; }
   }
   .filter-icon i:nth-child(2)::after { left: 10px; }
   #filter-title { font-size: 1.35rem; }
-  .filter-field-label { display: block; margin: 0 0 6px; color: var(--muted); font-size: .875rem; font-weight: 650; }
+  .filter-field-label { margin-bottom: 6px; font-size: .875rem; }
   #filter-fields { display: block; margin-top: 12px; }
-  #filter-fields .levels { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+  #filter-fields .levels, #filter-fields .sources { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
   #filter-fields .levels button { padding-inline: 4px; }
-  #filter-fields .source { display: block; margin-top: 14px; }
+  #filter-fields .filter-group + .filter-group, #filter-fields .sort { display: block; margin-top: 14px; }
+  #filter-fields .sources label { padding-inline: 8px; }
   #watched-filter { margin-top: 6px; }
   .filter-actions { display: flex; justify-content: space-between; margin-top: 7px; gap: 8px; }
   .filter-done { padding-inline: 24px; }

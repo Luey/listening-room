@@ -16,12 +16,14 @@ Open [localhost:8000](http://localhost:8000/). There is no separate build step. 
 
 ## Check a change
 
-Install Node.js and run these commands from the repository root:
+From the repository root, run `npm test` for library logic. It needs only Node.js and works without a browser, network, or localhost server.
+
+To also check the browser, run:
 
 ```sh
 npm ci --prefix .cursor/skills/verify-listening-room
 .cursor/skills/verify-listening-room/node_modules/.bin/playwright install chromium
-.cursor/skills/verify-listening-room/verify.mjs all
+npm run test:browser
 ```
 
 See the [verification guide](.cursor/skills/verify-listening-room/SKILL.md) for individual journeys and manual phone and playback checks. Evidence stays local under `verification-evidence/`.
@@ -32,4 +34,4 @@ With Python 3 and `yt-dlp` installed, run `python3 scripts/refresh_catalogue.py`
 
 ## Publish
 
-GitHub Actions runs the browser checks on pull requests and pushes to `main`. A successful run on `main` publishes `dist/` to the existing GitHub Pages address.
+GitHub Actions runs the browser checks on pull requests and pushes to `main`. Push to `main` to publish. GitHub publishes `dist/` only after the checks pass. If your session cannot start a local browser, check the [Actions run](https://github.com/Luey/listening-room/actions/workflows/pages.yml) for the pushed commit.

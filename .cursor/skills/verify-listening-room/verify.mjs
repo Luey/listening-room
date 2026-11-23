@@ -106,12 +106,26 @@ async function browse(page, catalogue) {
   const source = 'VideoEle';
   const level = 'Beginner';
   await page.getByRole('button', { name: level, exact: true }).click();
-  await page.getByRole('combobox', { name: 'Source' }).selectOption(source);
+  const beginner = page.getByRole('button', { name: level, exact: true });
+  const advanced = page.getByRole('button', { name: 'Advanced', exact: true });
+  await advanced.click();
+  assert.equal(await beginner.getAttribute('aria-pressed'), 'true');
+  assert.equal(await advanced.getAttribute('aria-pressed'), 'true');
+  await advanced.click();
+  const sources = page.getByRole('group', { name: 'Sources' });
+  for (const name of [...new Set(catalogue.map(video => video.source))]) {
+    if (name !== source) await sources.getByRole('checkbox', { name, exact: true }).uncheck();
+  }
   const eligible = catalogue.filter(video => video.source === source && video.level === level);
   assert(eligible.length, 'Missing VideoEle beginner videos');
   assert.equal(await page.locator('#result-count').textContent(), eligible.length + ' videos');
   assert((await cards.locator('.creator').allTextContents()).every(name => name === source));
   assert((await cards.locator('.level').allTextContents()).every(label => ['A1', 'A2'].includes(label)));
+  const sorting = page.getByRole('combobox', { name: 'Sort by' });
+  await sorting.selectOption('shortest');
+  const shortest = [...eligible].sort((a, b) => (a.seconds || Infinity) - (b.seconds || Infinity))[0];
+  assert.equal(await cards.first().getByRole('heading').textContent(), shortest.title);
+  await sorting.selectOption('default');
   const title = eligible[0].title;
   const search = page.getByRole('searchbox', { name: 'Search videos' });
   await search.fill(title);
@@ -178,7 +192,7 @@ async function player(page, catalogue) {
   record('External playback and automatic completion require the live playback check in features/player.md.');
 }
 
-async function pwa(page, _catalogue, context) {
+async function pwa(page, catalogue, context) {
   await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: 12000 });
   const manifestLink = await page.locator('link[rel=manifest]').getAttribute('href');
   const response = await context.request.get(new URL(manifestLink, url).href);
@@ -215,15 +229,21 @@ async function pwa(page, _catalogue, context) {
   await filters.click();
   assert.equal(await sheet.getByRole('button', { name: 'Advanced', exact: true }).isVisible(), true);
   await sheet.getByRole('button', { name: 'Beginner', exact: true }).click();
-  await sheet.getByRole('combobox', { name: 'Source' }).selectOption('VideoEle');
+  const sources = sheet.getByRole('group', { name: 'Sources' });
+  for (const name of [...new Set(catalogue.map(video => video.source))]) {
+    if (name !== 'VideoEle') await sources.getByRole('checkbox', { name, exact: true }).uncheck();
+  }
+  await sheet.getByRole('combobox', { name: 'Sort by' }).selectOption('shortest');
   await capture(page, 'pwa-iphone-filters');
   await sheet.getByRole('button', { name: 'Done', exact: true }).click();
   await sheet.waitFor({ state: 'hidden' });
-  assert.equal(await page.locator('#filter-summary').textContent(), 'Beginner · VideoEle');
+  assert.equal(await page.locator('#filter-summary').textContent(), 'Beginner · VideoEle · Shortest first');
   assert((await cards.locator('.creator').allTextContents()).every(name => name === 'VideoEle'));
   await filters.click();
   await sheet.getByRole('button', { name: 'Reset', exact: true }).click();
   assert.equal(await sheet.getByRole('checkbox', { name: 'Hide watched' }).isChecked(), true);
+  assert.equal(await sheet.getByRole('combobox', { name: 'Sort by' }).inputValue(), 'default');
+  assert.equal(await sources.getByRole('checkbox', { checked: false }).count(), 0);
   await sheet.getByRole('button', { name: 'Done', exact: true }).click();
   assert.equal(await page.locator('#filter-summary').textContent(), '');
   record('iPhone viewport: the filter sheet applies level and source and resets to defaults.');

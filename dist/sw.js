@@ -1,5 +1,5 @@
-const cacheName = 'listening-room-v5';
-const files = ['./', './index.html', './styles.css', './app.js', './catalog.json',
+const cacheName = 'listening-room-v6';
+const files = ['./', './index.html', './styles.css', './app.js', './library.js', './catalog.json',
   './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', event => {
