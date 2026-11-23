@@ -64,6 +64,9 @@ function render() {
   }
   $('library-heading').textContent = { browse: 'Browse videos', search: 'Search videos', watched: 'Watched videos' }[view];
   $('hide-watched').disabled = watchedOnly;
+  const activeFilters = [level !== levels[0] && level, source, !watchedOnly && !hide && 'Includes watched'].filter(Boolean);
+  $('filter-summary').textContent = activeFilters.join(' · ');
+  $('open-filters').classList.toggle('has-filters', activeFilters.length > 0);
   $('result-count').textContent = filtered.length.toLocaleString() + (filtered.length === 1 ? ' video' : ' videos');
   $('more').hidden = filtered.length <= limit;
   $('grid').replaceChildren(...filtered.slice(0, limit).map(makeCard));
@@ -220,7 +223,31 @@ for (const button of dockButtons) {
     if (next === 'search') $('search').focus({ preventScroll: true });
   };
 }
+function placeFilters() {
+  const dialog = $('filter-dialog');
+  const fields = $('filter-fields');
+  const watchedFilter = $('watched-filter');
+  if (mobileLayout.matches) {
+    $('sheet-filters').append(fields, watchedFilter);
+  } else {
+    if (dialog.open) dialog.close();
+    $('desktop-filters').append(fields);
+    $('results').append(watchedFilter);
+  }
+}
+
+$('open-filters').onclick = () => $('filter-dialog').showModal();
+$('reset-filters').onclick = () => {
+  level = levels[0];
+  $('source').value = '';
+  $('hide-watched').checked = true;
+  limit = pageSize;
+  levelFilters();
+  render();
+};
+placeFilters();
 mobileLayout.addEventListener('change', event => {
+  placeFilters();
   // Desktop search remains available in the library header.
   if (!event.matches && view === 'search') {
     view = 'browse';
