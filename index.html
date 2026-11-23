@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f7f3">
+<meta name="description" content="Find a Spanish video at your level and keep track of what you've watched.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="stylesheet" href="./styles.css">
+<title>The Listening Room</title>
+<script src="./app.js" type="module"></script>
+</head>
+<body>
+<header class="top"><div class="wrap nav">
+<a class="brand" href="./"><img src="./icon-192.png" alt="" width="34" height="34">The Listening Room</a>
+<button id="install" class="quiet">Install app</button>
+</div></header>
+<main class="wrap">
+<section class="intro" aria-labelledby="heading">
+<div><p class="eyebrow">SPANISH VIDEO LIBRARY</p><h1 id="heading">Listen in Spanish.</h1><p>Find a video you can follow, at a level that feels right.</p></div>
+<button id="progress" class="progress" aria-label="Show watched videos"><strong id="watched-count">0</strong><span>Watched</span></button>
+</section>
+<section aria-labelledby="library-heading" class="library">
+<div class="library-title"><h2 id="library-heading">Browse videos</h2><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" aria-label="Search videos" placeholder="Search videos"></label></div>
+<div class="filters"><div id="levels" class="levels" aria-label="Video level"></div><label class="source"><span class="visually-hidden">Source</span><select id="source"><option value="">All sources</option></select></label></div>
+<div class="results"><span id="result-count" role="status">Loading videos…</span><label class="toggle"><input id="hide-watched" type="checkbox" checked> Hide watched</label></div>
+<div id="grid" class="grid"></div>
+<button id="more" class="quiet more" hidden>Show more</button>
+</section>
+<footer>Videos play on YouTube. Watched history is saved on this device.</footer>
+</main>
+<dialog id="video-dialog"><div class="dialog-top"><h2 id="video-title"></h2><button id="close-video" class="quiet" aria-label="Close video">Close</button></div><div id="player-slot"></div><div class="dialog-actions"><a id="external-video" target="_blank" rel="noopener">Watch on YouTube</a><button class="quiet" id="mark-video"></button></div></dialog>
+<dialog id="install-dialog"><h2>Install The Listening Room</h2><p>On iPhone, open this page in Safari, tap Share, then choose <b>Add to Home Screen</b>.</p><p>On Android, open this page in Chrome, then choose <b>Install app</b> or <b>Add to Home screen</b> in the menu.</p><form method="dialog"><button class="quiet">Done</button></form></dialog>
+<template id="card"><article class="card"><button class="thumb"><img alt="" width="480" height="360" loading="lazy"><span class="play" aria-hidden="true">▶</span><span class="duration"></span></button><div class="card-body"><p class="meta"><span class="level"></span><span class="creator"></span></p><h3><button class="video-name"></button></h3><button class="mark"></button></div></article></template>
+</body>
+</html>
