@@ -1,4 +1,4 @@
-const cacheName = 'listening-room-v2';
+const cacheName = 'listening-room-v3';
 const files = ['./', './index.html', './styles.css', './app.js', './catalog.json',
   './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 

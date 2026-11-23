@@ -5,7 +5,9 @@ const pageSize = 24;
 let videos = [];
 let watched = new Set();
 let level = levels[0];
-let watchedOnly = false;
+let view = 'browse';
+const dockButtons = document.querySelectorAll('[data-view-target]');
+const mobileLayout = matchMedia('(max-width: 700px)');
 let limit = pageSize;
 let activeVideo;
 let player;
@@ -44,6 +46,7 @@ function duration(seconds) {
 }
 
 function render() {
+  const watchedOnly = view === 'watched';
   const query = searchKey($('search').value.trim());
   const source = $('source').value;
   const hide = $('hide-watched').checked;
@@ -55,7 +58,11 @@ function render() {
   $('watched-count').textContent = watched.size;
   $('progress').setAttribute('aria-pressed', String(watchedOnly));
   $('progress').setAttribute('aria-label', watchedOnly ? 'Show video library' : 'Show watched videos');
-  $('library-heading').textContent = watchedOnly ? 'Watched videos' : 'Browse videos';
+  document.body.dataset.view = view;
+  for (const button of dockButtons) {
+    button.setAttribute('aria-pressed', String(button.dataset.viewTarget === view));
+  }
+  $('library-heading').textContent = { browse: 'Browse videos', search: 'Search videos', watched: 'Watched videos' }[view];
   $('hide-watched').disabled = watchedOnly;
   $('result-count').textContent = filtered.length.toLocaleString() + (filtered.length === 1 ? ' video' : ' videos');
   $('more').hidden = filtered.length <= limit;
@@ -89,14 +96,16 @@ function makeCard(video) {
   mark.onclick = () => {
     setWatched(video.id, !watched.has(video.id));
     const buttons = [...$('grid').querySelectorAll('.mark')];
-    (buttons.find(button => button.dataset.video === video.id) ?? buttons[0] ?? $('progress')).focus();
+    (buttons.find(button => button.dataset.video === video.id) ?? buttons[0] ?? historyControl()).focus();
   };
   return card;
 }
 
 function updateMark(button, video) {
   const done = watched.has(video.id);
-  button.textContent = done ? '✓ Watched' : 'Mark watched';
+  const label = button.querySelector('.control-label') ?? button;
+  label.textContent = done ? '✓ Watched' : 'Mark watched';
+  button.title = done ? 'Mark unwatched' : 'Mark watched';
   button.setAttribute('aria-pressed', String(done));
   button.setAttribute('aria-label', (done ? 'Mark unwatched: ' : 'Mark watched: ') + video.title);
   button.dataset.video = video.id;
@@ -179,23 +188,48 @@ $('video-dialog').addEventListener('close', () => {
   activeVideo = undefined;
   if (document.activeElement === document.body) {
     const button = [...$('grid').querySelectorAll('.mark')].find(item => item.dataset.video === id);
-    (button ?? $('progress')).focus();
+    (button ?? historyControl()).focus();
   }
 });
 $('mark-video').onclick = () => {
   if (activeVideo) setWatched(activeVideo.id, !watched.has(activeVideo.id));
 };
-$('progress').onclick = () => {
-  watchedOnly = !watchedOnly;
-  if (watchedOnly) {
+function historyControl() {
+  return mobileLayout.matches ? dockButtons[2] : $('progress');
+}
+
+function selectView(next) {
+  const previous = view;
+  view = next;
+  if (next === 'watched' || previous === 'watched') {
     level = levels[0];
     $('source').value = '';
-    $('search').value = '';
     levelFilters();
   }
+  $('search').value = '';
   limit = pageSize;
   render();
-};
+}
+
+$('progress').onclick = () => selectView(view === 'watched' ? 'browse' : 'watched');
+for (const button of dockButtons) {
+  button.onclick = () => {
+    const next = button.dataset.viewTarget;
+    if (next !== view) selectView(next);
+    window.scrollTo(0, 0);
+    if (next === 'search') $('search').focus({ preventScroll: true });
+  };
+}
+mobileLayout.addEventListener('change', event => {
+  // Desktop search remains available in the library header.
+  if (!event.matches && view === 'search') {
+    view = 'browse';
+    render();
+  } else if (event.matches && view === 'browse' && $('search').value.trim()) {
+    view = 'search';
+    render();
+  }
+});
 for (const id of ['search', 'source', 'hide-watched']) {
   $(id).addEventListener(id === 'search' ? 'input' : 'change', () => {
     limit = pageSize;
